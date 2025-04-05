@@ -17,17 +17,17 @@ import java.util.UUID;
 public class Transaction extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    public User user;
+    private User user;
     @Column(precision = 15, scale = 2, nullable = false)
-    public BigDecimal amount;
+    private BigDecimal amount;
     @Column(length = 100)
-    public String category;
+    private String category;
     @Column(name = "sub_category", length = 100)
-    public String subCategory;
+    private String subCategory;
     @Column(length = 10, nullable = false)
-    public String type; // Consider using an enum for 'income' and 'expense'
+    private String type; // Consider using an enum for 'income' and 'expense'
     @Column(name = "transaction_date", nullable = false)
-    public LocalDate transactionDate;
+    private LocalDate transactionDate;
     @Id
     @GeneratedValue
     @UuidGenerator

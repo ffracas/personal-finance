@@ -17,19 +17,19 @@ import java.util.UUID;
 public class Investment extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    public User user;
+    private User user;
     @Column(length = 100)
-    public String name;
+    private String name;
     @Column(length = 50)
-    public String code;
+    private String code;
     @Column(name = "shares_owned", precision = 15, scale = 4)
-    public BigDecimal sharesOwned;
+    private BigDecimal sharesOwned;
     @Column(name = "unit_price", precision = 15, scale = 4)
-    public BigDecimal unitPrice;
+    private BigDecimal unitPrice;
     @Column(name = "investment_date", nullable = false)
-    public LocalDate investmentDate;
+    private LocalDate investmentDate;
     @Column(name = "current_value", precision = 15, scale = 2)
-    public BigDecimal currentValue;
+    private BigDecimal currentValue;
     @Id
     @GeneratedValue
     @UuidGenerator
