@@ -1,11 +1,9 @@
 package com.example.reactive.quarkus.personal.finance.model.response;
 
-import com.example.reactive.quarkus.personal.finance.model.entity.User;
-import jakarta.persistence.Column;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
-public record DepositResponseDto (Long userId, BigDecimal investedAmount, BigDecimal annualRate,
+public record DepositResponseDto (String userId, BigDecimal investedAmount, BigDecimal annualRate,
                                   LocalDate startDate, LocalDate endDate) {
 }
