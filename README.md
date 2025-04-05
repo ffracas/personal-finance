@@ -172,9 +172,43 @@ sequenceDiagram
 
 ```
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+# Personal Finance Management System
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+The Personal Finance Management System is designed to assist users in tracking and managing their financial activities,
+including assets, expenses, income, and investments. The backend provides RESTful APIs to retrieve and process financial
+data, offering insights into various aspects of personal finance.
+
+## Features
+
+- **Comprehensive Financial Overview**: Offers real-time data on assets, expenses, income, and investment performance.
+- **Budget Management**: Includes tools for analyzing spending patterns and projecting financial sustainability.
+- **Investment Tracking**: Provides automatic updates on market conditions to monitor investment portfolios.
+- **Recurring Expense Management**: Handles regular expenses with considerations for debt and credit management.
+- **Customizable Financial Goals**: Allows users to set and monitor long-term financial objectives.
+
+## Architecture
+
+The system is structured with a focus on modularity and scalability, employing a microservices architecture. Each
+service is responsible for a specific domain, such as user management, expense tracking, or investment analysis. The
+services communicate via RESTful APIs, ensuring a decoupled and maintainable codebase.
+
+## Technologies Used
+
+- **Backend**: Developed using Java with the Quarkus framework, providing a responsive and efficient environment for
+  building microservices.
+- **Data Storage**: Utilizes PostgreSQL for robust and reliable data management.
+- **Authentication**: Implements OAuth 2.0 for secure user authentication and authorization.
+- **API Documentation**: Employs Swagger for comprehensive API documentation and testing.
+
+## Getting Started
+
+To set up the project locally:
+
+1. **Clone the Repository**:
+
+```bash
+git clone https://github.com/ffracas/personal-finance.git
+```
 
 ## Running the application in dev mode
 
@@ -182,6 +216,14 @@ You can run your application in dev mode that enables live coding using:
 
 ```shell script
 ./mvnw quarkus:dev
+```
+
+## Swagger documentation
+
+You can see the swagger documentation on the next url
+
+```bash
+http://localhost:8585/q/swagger-ui/
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.

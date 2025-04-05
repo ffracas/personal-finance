@@ -1,37 +1,40 @@
 package com.example.reactive.quarkus.personal.finance.model.entity;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Bonds")
-public class Bond extends PanacheEntity {
-
+@Getter
+@Setter
+public class Bond extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
-
     @Column(length = 100)
     public String name;
-
     @Column(length = 50)
     public String code;
-
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(name = "invested_amount", precision = 15, scale = 2, nullable = false)
     public BigDecimal investedAmount;
-
-    @Column(precision = 5, scale = 2)
+    @Column(name = "annual_rate", precision = 5, scale = 2)
     public BigDecimal annualRate;
-
-    @Column(nullable = false)
+    @Column(name = "maturity_date", nullable = false)
     public LocalDate maturityDate;
-
-    @Column(length = 50)
+    @Column(name = "coupon_type", length = 50)
     public String couponType;
-
-    @Column(precision = 15, scale = 2)
+    @Column(name = "current_value", precision = 15, scale = 2)
     public BigDecimal currentValue;
+    @Id
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 }

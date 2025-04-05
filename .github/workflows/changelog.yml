@@ -1,0 +1,9 @@
+name: Build Quarkus App
+on: [ release ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Build Changelog"
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}

@@ -19,6 +19,7 @@ public class Finance {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Multi<FinanceResponseDto> getAllFinance() {
+        System.out.println("getAllFinance");
         return financeService.getFinanceResponseDtos();
     }
 

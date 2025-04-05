@@ -1,34 +1,30 @@
 package com.example.reactive.quarkus.personal.finance.model.entity;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "DepositAccounts")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DepositAccount extends PanacheEntity {
-
+public class DepositAccount extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
+    public User user;
     @Column(precision = 15, scale = 2, nullable = false)
-    private BigDecimal investedAmount;
-
+    public BigDecimal investedAmount;
     @Column(precision = 5, scale = 2)
-    private BigDecimal annualRate;
-
+    public BigDecimal annualRate;
     @Column(nullable = false)
-    private LocalDate startDate;
-
+    public LocalDate startDate;
     @Column(nullable = false)
-    private LocalDate endDate;
+    public LocalDate endDate;
+    @Id
+    @GeneratedValue
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
 }

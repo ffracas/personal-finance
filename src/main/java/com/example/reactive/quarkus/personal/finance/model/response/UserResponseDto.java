@@ -1,4 +1,4 @@
 package com.example.reactive.quarkus.personal.finance.model.response;
 
-public class UserResponseDto {
+public record UserResponseDto(String userId, String name, String email) {
 }
