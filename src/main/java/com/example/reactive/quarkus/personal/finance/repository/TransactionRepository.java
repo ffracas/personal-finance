@@ -25,7 +25,7 @@ import java.util.UUID;
  * the operations are executed within a transaction context.</p>
  */
 @ApplicationScoped
-public class TransactionRepository implements PanacheRepositoryBase<Transaction, UUID> {
+public final class TransactionRepository implements PanacheRepositoryBase<Transaction, UUID> {
 
     /**
      * Retrieves a transaction by its unique identifier.

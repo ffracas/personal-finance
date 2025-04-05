@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
-public class UserRepository implements PanacheRepositoryBase<User, UUID> {
+public final class UserRepository implements PanacheRepositoryBase<User, UUID> {
     @WithTransaction
     public Uni<User> getUserById(UUID id) {
         return findById(id);

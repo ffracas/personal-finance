@@ -6,4 +6,6 @@
     <include file="liquibase/sql/schema.sql"/>
     <include file="liquibase/sql/user.sql"/>
     <include file="liquibase/sql/transaction.sql"/>
+    <include file="liquibase/sql/recurring-expense.sql"/>
+    <include file="liquibase/sql/investment.sql"/>
 </databaseChangeLog>

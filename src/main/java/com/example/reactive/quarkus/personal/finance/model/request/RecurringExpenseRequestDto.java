@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
-public record RecurringExpenseRequestDto(BigDecimal amount, String category, String frequency, LocalDate startDate,
-                                         LocalDate endDate) {
+public record RecurringExpenseRequestDto(String userId, BigDecimal amount, String category, String frequency,
+                                         LocalDate startDate, LocalDate endDate) {
 }

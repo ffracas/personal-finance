@@ -17,21 +17,21 @@ import java.util.UUID;
 public class Bond extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    public User user;
+    private User user;
     @Column(length = 100)
-    public String name;
+    private String name;
     @Column(length = 50)
-    public String code;
+    private String code;
     @Column(name = "invested_amount", precision = 15, scale = 2, nullable = false)
-    public BigDecimal investedAmount;
+    private BigDecimal investedAmount;
     @Column(name = "annual_rate", precision = 5, scale = 2)
-    public BigDecimal annualRate;
+    private BigDecimal annualRate;
     @Column(name = "maturity_date", nullable = false)
-    public LocalDate maturityDate;
+    private LocalDate maturityDate;
     @Column(name = "coupon_type", length = 50)
-    public String couponType;
+    private String couponType;
     @Column(name = "current_value", precision = 15, scale = 2)
-    public BigDecimal currentValue;
+    private BigDecimal currentValue;
     @Id
     @GeneratedValue
     @UuidGenerator

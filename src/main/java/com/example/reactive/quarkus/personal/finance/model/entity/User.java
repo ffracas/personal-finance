@@ -17,11 +17,11 @@ public class User extends PanacheEntityBase {
     @Column(length = 100, nullable = false)
     private String name;
     @Column(unique = true, nullable = false)
-    public String email;
+    private String email;
     @Column(name = "password_hash", nullable = false)
-    public String passwordHash;
+    private String passwordHash;
     @Column(name = "creation_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    public LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime creationDate = LocalDateTime.now();
     @Id
     @GeneratedValue
     @UuidGenerator

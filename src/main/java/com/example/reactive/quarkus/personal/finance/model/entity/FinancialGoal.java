@@ -16,25 +16,25 @@ import java.util.UUID;
 public class FinancialGoal extends PanacheEntityBase {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    public User user;
+    private User user;
     @Column(name = "emergency_fund_target", precision = 15, scale = 2)
-    public BigDecimal emergencyFundTarget;
+    private BigDecimal emergencyFundTarget;
     @Column(name = "investment_target", precision = 15, scale = 2)
-    public BigDecimal investmentTarget;
+    private BigDecimal investmentTarget;
     @Column(name = "bonds_target", precision = 15, scale = 2)
-    public BigDecimal bondsTarget;
+    private BigDecimal bondsTarget;
     @Column(name = "loans_target", precision = 15, scale = 2)
-    public BigDecimal loansTarget;
+    private BigDecimal loansTarget;
     @Column(name = "investment_allocation", precision = 5, scale = 2)
-    public BigDecimal investmentAllocation;
+    private BigDecimal investmentAllocation;
     @Transient
     @Column(name = "current_expenses_allocation", precision = 5, scale = 2)
-    public BigDecimal currentExpensesAllocation;
+    private BigDecimal currentExpensesAllocation;
     @Transient
     @Column(name = "lifestyle_expensive_allocation", precision = 5, scale = 2)
-    public BigDecimal lifestyleExpensesAllocation;
+    private BigDecimal lifestyleExpensesAllocation;
     @Column(name = "emergency_months")
-    public Integer emergencyMonths;
+    private Integer emergencyMonths;
     @Id
     @GeneratedValue
     @UuidGenerator
