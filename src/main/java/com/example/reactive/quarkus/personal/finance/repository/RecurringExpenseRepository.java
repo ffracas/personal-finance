@@ -1,19 +1,20 @@
 package com.example.reactive.quarkus.personal.finance.repository;
 
 import com.example.reactive.quarkus.personal.finance.model.entity.RecurringExpense;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
-public final class RecurringExpenseRepository implements PanacheRepository<RecurringExpense> {
+public final class RecurringExpenseRepository implements PanacheRepositoryBase<RecurringExpense, UUID> {
     @WithTransaction
-    public Uni<RecurringExpense> getRecurringExpenseById(long id) {
-        return findById(id);
+    public Uni<RecurringExpense> getRecurringExpenseById(UUID recurringExpenseId) {
+        return findById(recurringExpenseId);
     }
 
     @WithTransaction
@@ -29,9 +30,7 @@ public final class RecurringExpenseRepository implements PanacheRepository<Recur
     }
 
     @WithTransaction
-    public Uni<Void> deleteRecurringExpense(RecurringExpense recurringExpense) {
-        return delete(recurringExpense)
-                .onFailure()
-                .invoke(Log::error);
+    public Uni<Boolean> deleteRecurringExpense(UUID recurringExpenseId) {
+        return deleteById(recurringExpenseId);
     }
 }

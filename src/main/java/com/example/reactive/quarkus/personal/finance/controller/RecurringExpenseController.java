@@ -7,6 +7,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
@@ -45,8 +46,11 @@ public final class RecurringExpenseController {
             @APIResponse(responseCode = "404", description = "Recurring expense not found"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Uni<RecurringExpenseResponseDto> getRecurringExpenseById(@PathParam("recurringExpenseId") Long recurringExpenseId) {
-        return recurringExpenseService.getRecurringExpenseById(recurringExpenseId);
+    public Uni<Response> getRecurringExpenseById(@PathParam("recurringExpenseId") String recurringExpenseId) {
+        return recurringExpenseService.getRecurringExpenseById(recurringExpenseId)
+                .map(expense -> Response.status(Response.Status.OK).entity(expense).build())
+                .onFailure()
+                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).entity(throwable).build());
     }
 
     @POST
@@ -57,12 +61,15 @@ public final class RecurringExpenseController {
             @APIResponse(responseCode = "400", description = "Invalid input"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Uni<RecurringExpenseResponseDto> createRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
-        return recurringExpenseService.createRecurringExpense(recurringExpenseRequestDto);
+    public Uni<Response> createRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
+        return recurringExpenseService.createRecurringExpense(recurringExpenseRequestDto)
+                .map(recurringExpenseResponseDto -> Response.status(Response.Status.CREATED).entity(recurringExpenseResponseDto).build())
+                .onFailure()
+                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());
     }
 
     @PUT
-    @Path("/updateRecurringExpense")
+    @Path("/updateRecurringExpense/{recurringExpenseId}")
     @Operation(summary = "Update an existing recurring expense")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Recurring expense updated successfully"),
@@ -70,12 +77,15 @@ public final class RecurringExpenseController {
             @APIResponse(responseCode = "404", description = "Recurring expense not found"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Uni<RecurringExpenseResponseDto> updateRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
-        return recurringExpenseService.updateRecurringExpense(recurringExpenseRequestDto);
+    public Uni<Response> updateRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto, @PathParam("recurringExpenseId") String recurringExpenseId) {
+        return recurringExpenseService.updateRecurringExpense(recurringExpenseRequestDto, recurringExpenseId)
+                .map(user -> Response.ok(user).status(Response.Status.OK).build())
+                .onFailure()
+                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @DELETE
-    @Path("/deleteRecurringExpense")
+    @Path("/deleteRecurringExpense/{recurringExpenseId}")
     @Operation(summary = "Delete an existing recurring expense")
     @APIResponses({
             @APIResponse(responseCode = "204", description = "Recurring expense deleted successfully"),
@@ -83,7 +93,10 @@ public final class RecurringExpenseController {
             @APIResponse(responseCode = "404", description = "Recurring expense not found"),
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
-    public Uni<Void> deleteRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
-        return recurringExpenseService.deleteRecurringExpense(recurringExpenseRequestDto);
+    public Uni<Response> deleteRecurringExpense(@PathParam("recurringExpenseId") String recurringExpenseId) {
+        return recurringExpenseService.deleteRecurringExpense(recurringExpenseId)
+                .map(response -> response ? Response.status(Response.Status.NO_CONTENT).build() : Response.status(Response.Status.NOT_FOUND).build())
+                .onFailure()
+                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
     }
 }
