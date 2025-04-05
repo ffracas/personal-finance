@@ -113,7 +113,7 @@ public final class RecurringExpenseService {
      * @see RecurringExpenseConverter#toDto(RecurringExpense)
      */
     public Multi<Set<RecurringExpenseResponseDto>> getAllRecurringExpense() {
-        return recurringExpenseRepository.getAllRecurringExpenses()
+        return recurringExpenseRepository.getAllRecurringExpenses().toMulti()
                 .map(recurringExpenseConverter::toDto);
     }
 

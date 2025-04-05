@@ -45,17 +45,9 @@ public class InvestmentRepository implements PanacheRepositoryBase<Investment, U
                 .invoke(Log::error);
     }
 
-    /**
-     * Retrieves all {@link Investment} entities from the database.
-     * <p>
-     * This method leverages the reactive {@link Multi} type to emit a stream of results.
-     * It fetches all available investments and converts the resulting list into a multi-item stream.
-     *
-     * @return a {@link Multi} emitting a {@link List} of all {@link Investment} entities
-     */
     @WithTransaction
-    public Multi<List<Investment>> getAllInvestment() {
-        return listAll().toMulti();
+    public Uni<List<Investment>> getAllInvestment() {
+        return listAll();
     }
 
     /**

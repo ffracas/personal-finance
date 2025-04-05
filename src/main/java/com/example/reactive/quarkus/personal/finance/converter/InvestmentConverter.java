@@ -24,6 +24,7 @@ public class InvestmentConverter implements Converter<InvestmentRequestDto, Inve
         investment.setCurrentValue(dto.currentValue());
         investment.setInvestmentDate(dto.investmentDate());
         investment.setUnitPrice(dto.unitPrice());
+        investment.setSharesOwned(dto.sharedOwned());
         User user = new User();
         user.setId(UUID.fromString(dto.userId()));
         investment.setUser(user);

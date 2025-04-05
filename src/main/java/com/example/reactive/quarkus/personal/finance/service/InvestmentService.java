@@ -99,8 +99,10 @@ public final class InvestmentService {
      *
      * @return a {@link Multi} emitting sets of {@link InvestmentResponseDto} instances representing all investments
      */
+
     public Multi<Set<InvestmentResponseDto>> getAllInvestments() {
         return investmentRepository.getAllInvestment()
+                .toMulti()
                 .map(investmentConverter::toDto);
     }
 

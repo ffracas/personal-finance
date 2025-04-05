@@ -1,3 +1,5 @@
+--liquibase formatted sql
+
 --changeset aspeeencinaf:16
 INSERT INTO RecurringExpenses (id, user_id, amount, category, frequency, start_date, end_date)
 VALUES ('5f3b5b3e-4f87-442b-b0cd-37c58a10548e', '1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec', 120.00, 'Rent', 'Monthly',
