@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class InvestmentConverter implements Converter<InvestmentRequestDto, InvestmentResponseDto, Investment> {
+public final class InvestmentConverter implements Converter<InvestmentRequestDto, InvestmentResponseDto, Investment> {
     @Override
     public InvestmentResponseDto toDto(Investment entity) {
         return new InvestmentResponseDto(entity.getId().toString(), entity.getUser().getId().toString(), entity.getName(),

@@ -12,32 +12,32 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 class BondControllerTest {
 
     @Test
-    void testGetRecurringExpenseId() {
+    void testGetBondId() {
         given()
-                .pathParam("recurringExpenseId", "5f3b5b3e-4f87-442b-b0cd-37c58a10548e")
+                .pathParam("bondId", "cc6df3fc-03c4-4f08-91b9-0b92d1db3344")
                 .when()
-                .get("/recurring-expense/getRecurringExpenseById/{recurringExpenseId}")
+                .get("/bond/getBondById/{bondId}")
                 .then()
                 .statusCode(200)
-                .body("recurringExpenseId", equalTo("5f3b5b3e-4f87-442b-b0cd-37c58a10548e"));
+                .body("maturity_date", equalTo("2027-03-01"));
     }
 
     @Test
-    void testGetRecurringExpenseIdNotFound() {
+    void testGetBondIdNotFound() {
         given()
-                .pathParam("recurringExpenseId", "1658cc09-ef5d-4f5b-8fe8-d9f71bfbfbec")
+                .pathParam("bondId", "1658cc09-ef5d-4f5b-8fe8-d9f71bfbfbec")
                 .when()
-                .get("/recurring-expense/getRecurringExpenseById/{recurringExpenseId}")
+                .get("/bond/getBondById/{bondId}")
                 .then()
                 .statusCode(404);
     }
 
 
     @Test
-    void testGetAllRecurringExpense() {
+    void testGetAllBond() {
         given()
                 .when()
-                .get("/recurring-expense/getAllRecurringExpense")
+                .get("/bond/getAllBond")
                 .then()
                 .statusCode(200)
                 // Assumes that at least one user exists in the system.
@@ -45,45 +45,47 @@ class BondControllerTest {
     }
 
     @Test
-    void testCreateRecurringExpense() {
-        String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
-                "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
+    void testCreateBond() {
+        String requestBody = "{\"userId\":\"a2f5e8c2-4c1d-43b2-b9d8-3f829bde6789\",\"name\": \"Italian Government Bond 2040\",  " +
+                "\"code\": \"ITB2030\", \"investedAmount\": 10000.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
+                "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
         given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .post("/recurring-expense/createRecurringExpense")
+                .post("/bond/createBond")
                 .then().log().all()
                 .statusCode(201)
-                .body("frequency", equalTo("Monthly"))
-                .body("amount", equalTo(100.0F));
+                .body("name", equalTo("Italian Government Bond 2040"))
+                .body("currentValue", equalTo(10250.75F));
     }
 
     @Test
-    void testCreateRecurringExpenseInternalServerError() {
-        String requestBody = "{\"userId\" : \"111\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
-                "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
+    void testCreateBondInternalServerError() {
+        String requestBody = "{\"userId\":\"11111\",\"name\": \"Italian Government Bond 2040\",  " +
+                "\"code\": \"ITB2030\", \"investedAmount\": 10000.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
+                "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
         given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .post("/recurring-expense/createRecurringExpense")
+                .post("/bond/createBond")
                 .then().log().all()
                 .statusCode(500);
     }
 
 
     @Test
-    void testUpdateRecurringExpense() {
+    void testUpdateBond() {
         // First, create a user to update.
         String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
                 "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
 
-        String recurringExpenseId = given()
+        String bondId = given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .post("/recurring-expense/createRecurringExpense")
+                .post("/bond/createBond")
                 .then()
                 .statusCode(201)
                 .extract().path("recurringExpenseId");
@@ -95,41 +97,41 @@ class BondControllerTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(updateRequest)
-                .pathParam("recurringExpenseId", recurringExpenseId)
+                .pathParam("bondId", bondId)
                 .when()
-                .put("/recurring-expense/updateRecurringExpense/{recurringExpenseId}")
+                .put("/bond/updateBond/{bondId}")
                 .then()
                 .statusCode(200)
                 .body("userId", equalTo("1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec"))
-                .body("recurringExpenseId", equalTo(recurringExpenseId));
+                .body("recurringExpenseId", equalTo(bondId));
     }
 
     @Test
-    void testDeleteRecurringExpenseById() {
+    void testDeleteBondById() {
         given()
-                .pathParam("recurringExpenseId", "9c0a7723-8d92-471b-a0f3-d6b0c31ea510")
+                .pathParam("bondId", "b45e690e-56c2-4bb1-9922-6fbe6c7a789a")
                 .when()
-                .delete("/recurring-expense/deleteRecurringExpense/{recurringExpenseId}")
+                .delete("/bond/deleteBond/{bondId}")
                 .then()
                 .statusCode(204);
     }
 
     @Test
-    void testDeleteRecurringExpenseByIdNotFound() {
+    void testDeleteBondByIdNotFound() {
         given()
-                .pathParam("recurringExpenseId", "660e8400-e29b-41d4-a716-552255440112")
+                .pathParam("bondId", "660e8400-e29b-41d4-a716-552255440112")
                 .when()
-                .delete("/recurring-expense/deleteRecurringExpense/{recurringExpenseId}")
+                .delete("/bond/deleteBond/{bondId}")
                 .then()
                 .statusCode(404);
     }
 
     @Test
-    void testDeleteRecurringExpenseByIdInternalServerError() {
+    void testDeleteBondByIdInternalServerError() {
         given()
-                .pathParam("recurringExpenseId", 11122)
+                .pathParam("bondId", 11122)
                 .when()
-                .delete("/recurring-expense/deleteRecurringExpense/{recurringExpenseId}")
+                .delete("/bond/deleteBond/{bondId}")
                 .then()
                 .statusCode(500);
     }

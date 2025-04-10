@@ -4,10 +4,12 @@ import com.example.reactive.quarkus.personal.finance.model.entity.Bond;
 import com.example.reactive.quarkus.personal.finance.model.entity.User;
 import com.example.reactive.quarkus.personal.finance.model.request.BondRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.BondResponseDto;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.UUID;
 
-public class BondConverter implements Converter<BondRequestDto, BondResponseDto, Bond> {
+@ApplicationScoped
+public final class BondConverter implements Converter<BondRequestDto, BondResponseDto, Bond> {
     @Override
     public BondResponseDto toDto(Bond entity) {
         return new BondResponseDto(entity.getId().toString(), entity.getUser().getId().toString(), entity.getName(),

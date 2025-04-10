@@ -20,7 +20,7 @@ public final class BondController {
 
 
     @GET
-    @Path("/getBond/{bondId}")
+    @Path("/getBondById/{bondId}")
     public Uni<Response> getBondById(@PathParam("bondId") String bondId) {
         return bondService.getBondById(bondId)
                 .map(user -> Response.ok(user).status(Response.Status.OK).build())
