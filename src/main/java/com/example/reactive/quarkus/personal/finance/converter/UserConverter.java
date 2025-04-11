@@ -20,9 +20,5 @@ public final class UserConverter implements Converter<UserRequestDto, UserRespon
         user.setEmail(dto.email());
         return user;
     }
-
-    @Override
-    public User toEntity(Long id, UserRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }

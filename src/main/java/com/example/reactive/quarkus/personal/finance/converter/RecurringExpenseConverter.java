@@ -29,9 +29,5 @@ public final class RecurringExpenseConverter implements Converter<RecurringExpen
         recurringExpense.setUser(user);
         return recurringExpense;
     }
-
-    @Override
-    public RecurringExpense toEntity(Long id, RecurringExpenseRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }
