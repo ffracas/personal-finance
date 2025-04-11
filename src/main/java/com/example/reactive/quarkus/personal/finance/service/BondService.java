@@ -5,6 +5,7 @@ import com.example.reactive.quarkus.personal.finance.model.entity.Bond;
 import com.example.reactive.quarkus.personal.finance.model.request.BondRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.BondResponseDto;
 import com.example.reactive.quarkus.personal.finance.repository.BondRepository;
+import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -123,6 +124,7 @@ public final class BondService {
      * @param bondRequestDto the DTO containing updated bond data
      * @return a {@link Uni} emitting the updated {@link BondResponseDto}
      */
+    @WithTransaction
     public Uni<BondResponseDto> updateBond(final String bondId, final BondRequestDto bondRequestDto) {
         return bondRepository.findById(UUID.fromString(bondId))
                 .map(bond -> updateBond(bond, bondRequestDto))

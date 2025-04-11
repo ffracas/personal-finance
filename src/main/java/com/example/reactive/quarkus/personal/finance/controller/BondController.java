@@ -23,7 +23,7 @@ public final class BondController {
     @Path("/getBondById/{bondId}")
     public Uni<Response> getBondById(@PathParam("bondId") String bondId) {
         return bondService.getBondById(bondId)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
+                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.OK).build())
                 .onFailure()
                 .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
     }
@@ -38,7 +38,7 @@ public final class BondController {
     @Path("/createBond")
     public Uni<Response> createBond(BondRequestDto bondRequestDto) {
         return bondService.createBond(bondRequestDto)
-                .map(user -> Response.ok(user).status(Response.Status.CREATED).build())
+                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.CREATED).build())
                 .onFailure()
                 .recoverWithItem(throwable -> Response.status(Response.Status.BAD_REQUEST).build());
     }
@@ -48,7 +48,7 @@ public final class BondController {
     @Path("/updateBond/{bondId}")
     public Uni<Response> updateBond(BondRequestDto bondRequestDto, @PathParam("bondId") String bondId) {
         return bondService.updateBond(bondId, bondRequestDto)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
+                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.OK).build())
                 .onFailure()
                 .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
     }

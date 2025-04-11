@@ -19,7 +19,7 @@ class BondControllerTest {
                 .get("/bond/getBondById/{bondId}")
                 .then()
                 .statusCode(200)
-                .body("maturity_date", equalTo("2027-03-01"));
+                .body("maturityDate", equalTo("2027-03-01"));
     }
 
     @Test
@@ -46,7 +46,7 @@ class BondControllerTest {
 
     @Test
     void testCreateBond() {
-        String requestBody = "{\"userId\":\"a2f5e8c2-4c1d-43b2-b9d8-3f829bde6789\",\"name\": \"Italian Government Bond 2040\",  " +
+        String requestBody = "{\"userId\":\"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"name\": \"Italian Government Bond 2040\",  " +
                 "\"code\": \"ITB2030\", \"investedAmount\": 10000.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
                 "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
         given()
@@ -65,6 +65,7 @@ class BondControllerTest {
         String requestBody = "{\"userId\":\"11111\",\"name\": \"Italian Government Bond 2040\",  " +
                 "\"code\": \"ITB2030\", \"investedAmount\": 10000.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
                 "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
+
         given()
                 .contentType(ContentType.JSON)
                 .body(requestBody)
@@ -78,8 +79,9 @@ class BondControllerTest {
     @Test
     void testUpdateBond() {
         // First, create a user to update.
-        String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
-                "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
+        String requestBody = "{\"userId\":\"1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec\",\"name\": \"Italian Government Bond 2060\",  " +
+                "\"code\": \"ITB2030\", \"investedAmount\": 10000.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
+                "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
 
         String bondId = given()
                 .contentType(ContentType.JSON)
@@ -88,11 +90,12 @@ class BondControllerTest {
                 .post("/bond/createBond")
                 .then()
                 .statusCode(201)
-                .extract().path("recurringExpenseId");
+                .extract().path("bondId");
 
         // Now update the user with a new name.
-        String updateRequest = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"1300.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
-                "\"startDate\": \"2025-04-01\",\"endDate\": \"2027-12-31\"}";
+        String updateRequest = "{\"userId\":\"1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec\",\"name\": \"Italian Government Bond 2030\",  " +
+                "\"code\": \"ITB2030\", \"investedAmount\": 102200.00,\"annualRate\": 2.50,\"maturityDate\": \"2035-12-31\", " +
+                "\"couponType\": \"Fixed\",\"currentValue\": 10250.75 }";
 
         given()
                 .contentType(ContentType.JSON)
@@ -102,8 +105,8 @@ class BondControllerTest {
                 .put("/bond/updateBond/{bondId}")
                 .then()
                 .statusCode(200)
-                .body("userId", equalTo("1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec"))
-                .body("recurringExpenseId", equalTo(bondId));
+                .body("userId", equalTo("1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec"))
+                .body("bondId", equalTo(bondId));
     }
 
     @Test
