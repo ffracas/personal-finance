@@ -6,7 +6,7 @@ import com.example.reactive.quarkus.personal.finance.model.response.UserResponse
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class UserConverter implements Converter<UserRequestDto, UserResponseDto, User> {
+public final class UserConverter implements Converter<UserRequestDto, UserResponseDto, User> {
     @Override
     public UserResponseDto toDto(User entity) {
         return new UserResponseDto(entity.getId().toString(), entity.getName(), entity.getEmail());

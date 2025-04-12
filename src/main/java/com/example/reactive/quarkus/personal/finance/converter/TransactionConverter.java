@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class TransactionConverter implements Converter<TransactionRequestDto, TransactionResponseDto, Transaction> {
+public final class TransactionConverter implements Converter<TransactionRequestDto, TransactionResponseDto, Transaction> {
     @Override
     public TransactionResponseDto toDto(Transaction entity) {
         return new TransactionResponseDto(entity.getUser().getId(), entity.getId().toString(), entity.getAmount(), entity.getCategory(),

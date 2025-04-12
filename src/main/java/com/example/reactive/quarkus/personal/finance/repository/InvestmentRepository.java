@@ -25,7 +25,7 @@ import java.util.UUID;
  * @see Investment
  */
 @ApplicationScoped
-public class InvestmentRepository implements PanacheRepositoryBase<Investment, UUID> {
+public final class InvestmentRepository implements PanacheRepositoryBase<Investment, UUID> {
 
     /**
      * Persists the provided {@link Investment} entity in the database.
