@@ -2,7 +2,7 @@ package com.example.reactive.quarkus.personal.finance.controller;
 
 import com.example.reactive.quarkus.personal.finance.model.request.DepositAccountRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.DepositAccountResponseDto;
-import com.example.reactive.quarkus.personal.finance.service.DepositService;
+import com.example.reactive.quarkus.personal.finance.service.DepositAccountService;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.*;
@@ -19,10 +19,10 @@ import java.util.Set;
 @Tag(name = "Deposit", description = "Deposit API")
 public class DepositAccountController {
 
-    private final DepositService depositService;
+    private final DepositAccountService depositService;
 
 
-    public DepositAccountController(DepositService depositService) {
+    public DepositAccountController(DepositAccountService depositService) {
         this.depositService = depositService;
     }
 
