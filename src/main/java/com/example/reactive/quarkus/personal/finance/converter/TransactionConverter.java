@@ -29,9 +29,5 @@ public final class TransactionConverter implements Converter<TransactionRequestD
         transaction.setUser(user);
         return transaction;
     }
-
-    @Override
-    public Transaction toEntity(Long id, TransactionRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }

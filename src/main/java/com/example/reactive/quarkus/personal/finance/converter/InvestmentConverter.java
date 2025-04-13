@@ -30,9 +30,5 @@ public final class InvestmentConverter implements Converter<InvestmentRequestDto
         investment.setUser(user);
         return investment;
     }
-
-    @Override
-    public Investment toEntity(Long id, InvestmentRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }

@@ -32,9 +32,5 @@ public final class BondConverter implements Converter<BondRequestDto, BondRespon
         bond.setUser(user);
         return bond;
     }
-
-    @Override
-    public Bond toEntity(Long id, BondRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }
