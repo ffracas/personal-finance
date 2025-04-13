@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class RecurringExpenseConverter implements Converter<RecurringExpenseRequestDto, RecurringExpenseResponseDto, RecurringExpense> {
+public final class RecurringExpenseConverter implements Converter<RecurringExpenseRequestDto, RecurringExpenseResponseDto, RecurringExpense> {
     @Override
     public RecurringExpenseResponseDto toDto(RecurringExpense entity) {
         return new RecurringExpenseResponseDto(entity.getId().toString(), entity.getUser().getId().toString(),
@@ -29,9 +29,5 @@ public class RecurringExpenseConverter implements Converter<RecurringExpenseRequ
         recurringExpense.setUser(user);
         return recurringExpense;
     }
-
-    @Override
-    public RecurringExpense toEntity(Long id, RecurringExpenseRequestDto dto) {
-        return toEntity(dto);
-    }
+ 
 }

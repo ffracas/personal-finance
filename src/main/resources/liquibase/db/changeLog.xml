@@ -8,5 +8,5 @@
     <include file="liquibase/sql/transaction.sql"/>
     <include file="liquibase/sql/recurring-expense.sql"/>
     <include file="liquibase/sql/investment.sql"/>
-    <include file="liquibase/sql/deposit-account.sql"/>
+    <include file="liquibase/sql/bond.sql"/>
 </databaseChangeLog>
