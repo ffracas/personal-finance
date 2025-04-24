@@ -33,6 +33,13 @@ import java.util.UUID;
 @ApplicationScoped
 public final class TransactionRepository implements PanacheRepositoryBase<Transaction, UUID> {
 
+    public static Uni<Either<Error, Transaction>> processResponse(Uni<Transaction> transactionUni) {
+        return transactionUni
+                .<Either<Error, Transaction>>map(transaction -> transaction != null ? Either.right(transaction) : Either.left(new TransactionNotFound(TransactionRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new TransactionServerError(throwable.getMessage(), TransactionRepository.class.getName())));
+    }
+
     /**
      * Retrieves a transaction by its unique identifier.
      * This method queries the database for a transaction with the given {@link UUID} and returns
@@ -81,13 +88,6 @@ public final class TransactionRepository implements PanacheRepositoryBase<Transa
     @WithTransaction
     public Uni<Either<Error, Transaction>> saveTransaction(Transaction transaction) {
         return processResponse(persist(transaction));
-    }
-
-    public Uni<Either<Error, Transaction>> processResponse(Uni<Transaction> transactionUni) {
-        return transactionUni
-                .<Either<Error, Transaction>>map(transaction -> transaction != null ? Either.right(transaction) : Either.left(new TransactionNotFound(TransactionRepository.class.getName())))
-                .onFailure()
-                .recoverWithItem(throwable -> Either.left(new TransactionServerError(throwable.getMessage(), TransactionRepository.class.getName())));
     }
 
     /**
