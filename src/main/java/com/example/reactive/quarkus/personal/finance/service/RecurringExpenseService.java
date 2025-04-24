@@ -1,9 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.service;
 
 import com.example.reactive.quarkus.personal.finance.converter.RecurringExpenseConverter;
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.RecurringExpense;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
 import com.example.reactive.quarkus.personal.finance.model.request.RecurringExpenseRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.RecurringExpenseResponseDto;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import com.example.reactive.quarkus.personal.finance.repository.RecurringExpenseRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
@@ -12,6 +15,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Set;
 import java.util.UUID;
+
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.createUniError;
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.startUniFromItem;
 
 /**
  * <p>
@@ -95,9 +101,12 @@ public final class RecurringExpenseService {
      * @see RecurringExpenseRepository#getRecurringExpenseById(UUID)
      * @see RecurringExpenseConverter#toDto(RecurringExpense)
      */
-    public Uni<RecurringExpenseResponseDto> getRecurringExpenseById(String recurringExpenseId) {
-        return recurringExpenseRepository.getRecurringExpenseById(UUID.fromString(recurringExpenseId))
-                .map(recurringExpenseConverter::toDto);
+    public Uni<Either<Error, RecurringExpenseResponseDto>> getRecurringExpenseById(String recurringExpenseId) {
+        return startUniFromItem(recurringExpenseId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> recurringExpenseRepository.getRecurringExpenseById(uuid)
+                        .map(errorRecurringExpenseEither -> errorRecurringExpenseEither
+                                .map(recurringExpenseConverter::toDto)));
     }
 
     /**
@@ -132,10 +141,10 @@ public final class RecurringExpenseService {
      * @see RecurringExpenseConverter#toEntity(RecurringExpenseRequestDto)
      * @see RecurringExpenseConverter#toDto(RecurringExpense)
      */
-    public Uni<RecurringExpenseResponseDto> createRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
-        return recurringExpenseRepository.saveRecurringExpense(
-                        recurringExpenseConverter.toEntity(recurringExpenseRequestDto))
-                .map(recurringExpenseConverter::toDto);
+    public Uni<Either<Error, RecurringExpenseResponseDto>> createRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto) {
+        return startUniFromItem(recurringExpenseConverter.toEntity(recurringExpenseRequestDto))
+                .flatMap(recurringExpenseRequestDto1 -> recurringExpenseRepository.saveRecurringExpense(recurringExpenseRequestDto1)
+                        .map(errorRecurringExpenseEither -> errorRecurringExpenseEither.map(recurringExpenseConverter::toDto)));
     }
 
     /**
@@ -155,11 +164,14 @@ public final class RecurringExpenseService {
      * @see RecurringExpenseConverter#toDto(RecurringExpense)
      */
     @WithTransaction
-    public Uni<RecurringExpenseResponseDto> updateRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto, String recurringExpenseId) {
-        return recurringExpenseRepository.getRecurringExpenseById(UUID.fromString(recurringExpenseId))
-                .map(recurringExpense -> updateRecurringExpense(recurringExpense, recurringExpenseRequestDto))
-                .flatMap(recurringExpense -> recurringExpenseRepository.saveRecurringExpense(recurringExpense)
-                        .map(recurringExpenseConverter::toDto));
+    public Uni<Either<Error, RecurringExpenseResponseDto>> updateRecurringExpense(RecurringExpenseRequestDto recurringExpenseRequestDto, String recurringExpenseId) {
+        return startUniFromItem(recurringExpenseId)
+                .map(UUID::fromString)
+                .flatMap(recurringExpenseRepository::getRecurringExpenseById)
+                .map(either -> either.map(recurringExpense -> updateRecurringExpense(recurringExpense, recurringExpenseRequestDto)))
+                .flatMap(either -> either.fold(error -> createUniError(either),
+                        recurringExpense -> recurringExpenseRepository.saveRecurringExpense(recurringExpense)
+                                .map(errorEither -> errorEither.map(recurringExpenseConverter::toDto))));
     }
 
     /**
@@ -173,7 +185,7 @@ public final class RecurringExpenseService {
      * @return a {@link Uni} containing a {@code Boolean} indicating whether the deletion was successful.
      * {@code true} if the recurring expense was deleted, {@code false} if no such expense was found.
      */
-    public Uni<Boolean> deleteRecurringExpense(String recurringExpenseId) {
+    public Uni<Either<Error, Success>> deleteRecurringExpense(String recurringExpenseId) {
         return recurringExpenseRepository.deleteRecurringExpense(UUID.fromString(recurringExpenseId));
     }
 

@@ -33,14 +33,14 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
  * @see UserController
  */
 @QuarkusTest
-public class UserControllerTest {
+class UserControllerTest {
 
     /**
      * Tests that a user with the given ID is successfully retrieved.
      * Assumes that a user with ID 1 exists.
      */
     @Test
-    public void testGetUserById() {
+    void testGetUserById() {
         given()
                 .pathParam("userId", "1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec")
                 .when()
@@ -54,7 +54,7 @@ public class UserControllerTest {
      * Tests that the endpoint to retrieve all users returns a non-empty collection.
      */
     @Test
-    public void testGetAllUser() {
+    void testGetAllUser() {
         given()
                 .when()
                 .get("/user/getAllUser")
@@ -69,7 +69,7 @@ public class UserControllerTest {
      * and the response is verified to contain the correct name and a generated ID.
      */
     @Test
-    public void testCreateUser() {
+    void testCreateUser() {
         String requestBody = "{\"name\": \"New User\",\"password\": \"TheP4ssW0r41sTh383ST\",\"email\": \"thebestemail@bigmail.com\"}";
 
         given()
@@ -88,7 +88,7 @@ public class UserControllerTest {
      * The test verifies that the update endpoint returns the updated user details.
      */
     @Test
-    public void testUpdateUser() {
+    void testUpdateUser() {
         // First, create a user to update.
         String requestBody = "{\"name\": \"New User To Update\",\"password\": \"TheP4ssW0r41sTh383\",\"email\": \"thebestemailupdated@bigmail.com\"}";
 
@@ -118,7 +118,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserById() {
+    void testDeleteUserById() {
         given()
                 .pathParam("userId", "1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec")
                 .when()
@@ -128,7 +128,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserByIdNotFound() {
+    void testDeleteUserByIdNotFound() {
         given()
                 .pathParam("userId", "1658cc09-ef5d-4f5b-1111-d9f7abfbfbec")
                 .when()
@@ -138,7 +138,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testDeleteUserByIdInternalServerError() {
+    void testDeleteUserByIdInternalServerError() {
         given()
                 .pathParam("userId", 11122)
                 .when()

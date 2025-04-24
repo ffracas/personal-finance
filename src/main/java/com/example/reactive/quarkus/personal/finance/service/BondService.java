@@ -1,9 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.service;
 
 import com.example.reactive.quarkus.personal.finance.converter.BondConverter;
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Bond;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
 import com.example.reactive.quarkus.personal.finance.model.request.BondRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.BondResponseDto;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import com.example.reactive.quarkus.personal.finance.repository.BondRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
@@ -12,6 +15,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Set;
 import java.util.UUID;
+
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.createUniError;
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.startUniFromItem;
 
 /**
  * {@code BondService} is a stateless application-scoped service that provides
@@ -36,7 +42,7 @@ import java.util.UUID;
  * <p>This service is annotated with {@link ApplicationScoped}, making it a singleton
  * within the CDI context, ideal for stateless business logic.</p>
  *
- * @author
+ * @author Fabian Aspee Encina
  */
 @ApplicationScoped
 public final class BondService {
@@ -79,9 +85,10 @@ public final class BondService {
      * @param bondRequestDto the request DTO containing bond details
      * @return a {@link Uni} emitting the created {@link BondResponseDto}
      */
-    public Uni<BondResponseDto> createBond(final BondRequestDto bondRequestDto) {
-        return bondRepository.createBond(bondConverter.toEntity(bondRequestDto))
-                .map(bondConverter::toDto);
+    public Uni<Either<Error, BondResponseDto>> createBond(final BondRequestDto bondRequestDto) {
+        return startUniFromItem(bondConverter.toEntity(bondRequestDto))
+                .flatMap(bondRequestDto1 -> bondRepository.createBond(bondRequestDto1)
+                        .map(errorBondEither -> errorBondEither.map(bondConverter::toDto)));
     }
 
     /**
@@ -90,9 +97,12 @@ public final class BondService {
      * @param bondId the UUID string of the bond to retrieve
      * @return a {@link Uni} emitting the corresponding {@link BondResponseDto}
      */
-    public Uni<BondResponseDto> getBondById(final String bondId) {
-        return bondRepository.getBondById(UUID.fromString(bondId))
-                .map(bondConverter::toDto);
+    public Uni<Either<Error, BondResponseDto>> getBondById(final String bondId) {
+        return startUniFromItem(bondId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> bondRepository.getBondById(uuid)
+                        .map(errorBondEither -> errorBondEither
+                                .map(bondConverter::toDto)));
     }
 
     /**
@@ -102,7 +112,7 @@ public final class BondService {
      * @return a {@link Uni} emitting {@code true} if the bond was successfully deleted,
      * {@code false} otherwise
      */
-    public Uni<Boolean> deleteBond(final String bondId) {
+    public Uni<Either<Error, Success>> deleteBond(final String bondId) {
         return bondRepository.deleteBond(UUID.fromString(bondId));
     }
 
@@ -125,11 +135,14 @@ public final class BondService {
      * @return a {@link Uni} emitting the updated {@link BondResponseDto}
      */
     @WithTransaction
-    public Uni<BondResponseDto> updateBond(final String bondId, final BondRequestDto bondRequestDto) {
-        return bondRepository.findById(UUID.fromString(bondId))
-                .map(bond -> updateBond(bond, bondRequestDto))
-                .flatMap(bondRepository::persist)
-                .map(bondConverter::toDto);
+    public Uni<Either<Error, BondResponseDto>> updateBond(final String bondId, final BondRequestDto bondRequestDto) {
+        return startUniFromItem(bondId)
+                .map(UUID::fromString)
+                .flatMap(bondRepository::getBondById)
+                .map(either -> either.map(bond -> updateBond(bond, bondRequestDto)))
+                .flatMap(either -> either.fold(error -> createUniError(either),
+                        bond -> bondRepository.createBond(bond)
+                                .map(either1 -> either1.map(bondConverter::toDto))));
     }
 }
 

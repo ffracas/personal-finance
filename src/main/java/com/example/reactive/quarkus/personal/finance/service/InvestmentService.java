@@ -1,9 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.service;
 
 import com.example.reactive.quarkus.personal.finance.converter.InvestmentConverter;
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Investment;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
 import com.example.reactive.quarkus.personal.finance.model.request.InvestmentRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.InvestmentResponseDto;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import com.example.reactive.quarkus.personal.finance.repository.InvestmentRepository;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
@@ -12,6 +15,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Set;
 import java.util.UUID;
+
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.createUniError;
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.startUniFromItem;
 
 /**
  * {@code InvestmentService} provides business logic for handling investment-related operations.
@@ -77,9 +83,10 @@ public final class InvestmentService {
      * @param investmentRequestDto the investment details to be saved
      * @return a {@link Uni} emitting the saved investment as a {@link InvestmentResponseDto}
      */
-    public Uni<InvestmentResponseDto> createInvestment(InvestmentRequestDto investmentRequestDto) {
-        return investmentRepository.saveInvestment(investmentConverter.toEntity(investmentRequestDto))
-                .map(investmentConverter::toDto);
+    public Uni<Either<Error, InvestmentResponseDto>> createInvestment(InvestmentRequestDto investmentRequestDto) {
+        return startUniFromItem(investmentRequestDto)
+                .flatMap(investmentRequestDto1 -> investmentRepository.saveInvestment(investmentConverter.toEntity(investmentRequestDto1))
+                        .map(either -> either.map(investmentConverter::toDto)));
     }
 
     /**
@@ -89,9 +96,11 @@ public final class InvestmentService {
      * @return a {@link Uni} emitting the corresponding {@link InvestmentResponseDto} if found,
      * or an empty result if not found
      */
-    public Uni<InvestmentResponseDto> getInvestmentById(String investmentId) {
-        return investmentRepository.getInvestmentById(UUID.fromString(investmentId))
-                .map(investmentConverter::toDto);
+    public Uni<Either<Error, InvestmentResponseDto>> getInvestmentById(String investmentId) {
+        return startUniFromItem(investmentId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> investmentRepository.getInvestmentById(uuid)
+                        .map(either -> either.map(investmentConverter::toDto)));
     }
 
     /**
@@ -112,8 +121,10 @@ public final class InvestmentService {
      * @param investmentId the UUID of the investment to delete (as a String)
      * @return a {@link Uni} emitting {@code true} if deletion was successful, {@code false} otherwise
      */
-    public Uni<Boolean> deleteInvestmentById(String investmentId) {
-        return investmentRepository.deleteInvestment(UUID.fromString(investmentId));
+    public Uni<Either<Error, Success>> deleteInvestmentById(String investmentId) {
+        return startUniFromItem(investmentId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> investmentRepository.deleteInvestment(UUID.fromString(investmentId)));
     }
 
     /**
@@ -126,10 +137,14 @@ public final class InvestmentService {
      * @return a {@link Uni} emitting the updated {@link InvestmentResponseDto}
      */
     @WithTransaction
-    public Uni<InvestmentResponseDto> updateInvestment(InvestmentRequestDto investmentRequestDto, String investmentId) {
-        return investmentRepository.getInvestmentById(UUID.fromString(investmentId))
-                .map(investment -> updateInvestment(investment, investmentRequestDto))
-                .flatMap(investment -> investmentRepository.saveInvestment(investment)
-                        .map(investmentConverter::toDto));
+    public Uni<Either<Error, InvestmentResponseDto>> updateInvestment(InvestmentRequestDto investmentRequestDto, String investmentId) {
+        return startUniFromItem(investmentId)
+                .map(UUID::fromString)
+                .flatMap(investmentRepository::getInvestmentById)
+                .map(errorInvestmentEither -> errorInvestmentEither.map(investment -> updateInvestment(investment, investmentRequestDto)))
+                .flatMap(errorInvestmentEither -> errorInvestmentEither.fold(error -> createUniError(errorInvestmentEither),
+                        investment -> investmentRepository.saveInvestment(investment)
+                                .map(errorInvestmentEither1 -> errorInvestmentEither1
+                                        .map(investmentConverter::toDto))));
     }
 }

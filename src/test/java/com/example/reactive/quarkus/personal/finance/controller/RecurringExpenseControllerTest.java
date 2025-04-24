@@ -9,9 +9,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 @QuarkusTest
-public class RecurringExpenseControllerTest {
+class RecurringExpenseControllerTest {
     @Test
-    public void testGetRecurringExpenseId() {
+    void testGetRecurringExpenseId() {
         given()
                 .pathParam("recurringExpenseId", "5f3b5b3e-4f87-442b-b0cd-37c58a10548e")
                 .when()
@@ -22,7 +22,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testGetRecurringExpenseIdNotFound() {
+    void testGetRecurringExpenseIdNotFound() {
         given()
                 .pathParam("recurringExpenseId", "1658cc09-ef5d-4f5b-8fe8-d9f71bfbfbec")
                 .when()
@@ -33,7 +33,7 @@ public class RecurringExpenseControllerTest {
 
 
     @Test
-    public void testGetAllRecurringExpense() {
+    void testGetAllRecurringExpense() {
         given()
                 .when()
                 .get("/recurring-expense/getAllRecurringExpense")
@@ -44,7 +44,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testCreateRecurringExpense() {
+    void testCreateRecurringExpense() {
         String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
                 "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
         given()
@@ -59,7 +59,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testCreateRecurringExpenseInternalServerError() {
+    void testCreateRecurringExpenseInternalServerError() {
         String requestBody = "{\"userId\" : \"111\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
                 "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
         given()
@@ -73,7 +73,7 @@ public class RecurringExpenseControllerTest {
 
 
     @Test
-    public void testUpdateRecurringExpense() {
+    void testUpdateRecurringExpense() {
         // First, create a user to update.
         String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"100.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
                 "\"startDate\": \"2025-04-01\",\"endDate\": \"2025-12-31\"}";
@@ -90,7 +90,7 @@ public class RecurringExpenseControllerTest {
         // Now update the user with a new name.
         String updateRequest = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\": \"1300.00\",\"category\": \"Utilities\",\"frequency\": \"Monthly\"," +
                 "\"startDate\": \"2025-04-01\",\"endDate\": \"2027-12-31\"}";
-        ;
+
         given()
                 .contentType(ContentType.JSON)
                 .body(updateRequest)
@@ -104,7 +104,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testDeleteRecurringExpenseById() {
+    void testDeleteRecurringExpenseById() {
         given()
                 .pathParam("recurringExpenseId", "9c0a7723-8d92-471b-a0f3-d6b0c31ea510")
                 .when()
@@ -114,7 +114,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testDeleteRecurringExpenseByIdNotFound() {
+    void testDeleteRecurringExpenseByIdNotFound() {
         given()
                 .pathParam("recurringExpenseId", "660e8400-e29b-41d4-a716-552255440112")
                 .when()
@@ -124,7 +124,7 @@ public class RecurringExpenseControllerTest {
     }
 
     @Test
-    public void testDeleteRecurringExpenseByIdInternalServerError() {
+    void testDeleteRecurringExpenseByIdInternalServerError() {
         given()
                 .pathParam("recurringExpenseId", 11122)
                 .when()

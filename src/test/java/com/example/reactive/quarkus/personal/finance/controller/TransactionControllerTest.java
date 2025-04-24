@@ -9,9 +9,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 @QuarkusTest
-public class TransactionControllerTest {
+class TransactionControllerTest {
     @Test
-    public void testGetTransactionById() {
+    void testGetTransactionById() {
         given()
                 .pathParam("transactionId", "550e8400-e29b-41d4-a716-446655440000")
                 .when()
@@ -22,7 +22,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testGetTransactionByIdNotFound() {
+    void testGetTransactionByIdNotFound() {
         given()
                 .pathParam("transactionId", "550e8400-e29b-41d4-a716-446651440000")
                 .when()
@@ -35,7 +35,7 @@ public class TransactionControllerTest {
      * Tests that the endpoint to retrieve all users returns a non-empty collection.
      */
     @Test
-    public void testGetAllTransaction() {
+    void testGetAllTransaction() {
         given()
                 .when()
                 .get("/transaction/getAllTransaction")
@@ -50,7 +50,7 @@ public class TransactionControllerTest {
      * and the response is verified to contain the correct name and a generated ID.
      */
     @Test
-    public void testCreateTransaction() {
+    void testCreateTransaction() {
         String requestBody = "{ \"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f8abfbfbec\",\"amount\" : \"250.75\", " +
                 "\"category\" : \"Utilities\", \"subCategory\" : \"Electricity\", \"type\" : \"Expense\", " +
                 "\"transactionDate\" : \"2025-04-03\"}";
@@ -67,7 +67,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testCreateTransactionInternalServerError() {
+    void testCreateTransactionInternalServerError() {
         String requestBody = "{ \"userId\" : \"111\",\"amount\" : \"250.75\", " +
                 "\"category\" : \"Utilities\", \"subCategory\" : \"Electricity\", \"type\" : \"Expense\", " +
                 "\"transactionDate\" : \"2025-04-03\"}";
@@ -82,7 +82,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testUpdateTransaction() {
+    void testUpdateTransaction() {
         // First, create a user to update.
 
         String requestBody = "{\"userId\" : \"1658cc09-ef5d-4f5b-8fe8-d9f7abfbfbec\", \"amount\" : \"250.75\", \"category\" : \"Utilities\",  \"subCategory\" : \"Electricity\",  \"type\" : \"Expense\",\"transactionDate\" : \"2025-04-03\"}";
@@ -110,7 +110,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testDeleteTransactionById() {
+    void testDeleteTransactionById() {
         given()
                 .pathParam("transactionId", "660e8400-e29b-41d4-a716-556655440112")
                 .when()
@@ -120,7 +120,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testDeleteTransactionByIdNotFound() {
+    void testDeleteTransactionByIdNotFound() {
         given()
                 .pathParam("transactionId", "660e8400-e29b-41d4-a716-552255440112")
                 .when()
@@ -130,7 +130,7 @@ public class TransactionControllerTest {
     }
 
     @Test
-    public void testDeleteTransactionByIdInternalServerError() {
+    void testDeleteTransactionByIdInternalServerError() {
         given()
                 .pathParam("transactionId", 11122)
                 .when()

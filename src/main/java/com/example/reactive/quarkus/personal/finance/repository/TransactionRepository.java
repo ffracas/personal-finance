@@ -1,6 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.repository;
 
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Transaction;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
+import com.example.reactive.quarkus.personal.finance.model.error.TransactionNotFound;
+import com.example.reactive.quarkus.personal.finance.model.error.TransactionServerError;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
+import com.example.reactive.quarkus.personal.finance.model.success.TransactionDeleteOk;
 import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.quarkus.logging.Log;
@@ -27,6 +33,13 @@ import java.util.UUID;
 @ApplicationScoped
 public final class TransactionRepository implements PanacheRepositoryBase<Transaction, UUID> {
 
+    public static Uni<Either<Error, Transaction>> processResponse(Uni<Transaction> transactionUni) {
+        return transactionUni
+                .<Either<Error, Transaction>>map(transaction -> transaction != null ? Either.right(transaction) : Either.left(new TransactionNotFound(TransactionRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new TransactionServerError(throwable.getMessage(), TransactionRepository.class.getName())));
+    }
+
     /**
      * Retrieves a transaction by its unique identifier.
      * This method queries the database for a transaction with the given {@link UUID} and returns
@@ -39,8 +52,8 @@ public final class TransactionRepository implements PanacheRepositoryBase<Transa
      * @return a {@link Uni} containing the {@link Transaction} entity or empty if no transaction is found.
      */
     @WithTransaction
-    public Uni<Transaction> getTransactionById(UUID id) {
-        return findById(id);
+    public Uni<Either<Error, Transaction>> getTransactionById(UUID id) {
+        return processResponse(findById(id));
     }
 
     /**
@@ -73,10 +86,8 @@ public final class TransactionRepository implements PanacheRepositoryBase<Transa
      * @return a {@link Uni} containing the persisted {@link Transaction} entity.
      */
     @WithTransaction
-    public Uni<Transaction> saveTransaction(Transaction transaction) {
-        return persist(transaction)
-                .onFailure()
-                .invoke(Log::error);
+    public Uni<Either<Error, Transaction>> saveTransaction(Transaction transaction) {
+        return processResponse(persist(transaction));
     }
 
     /**
@@ -92,8 +103,11 @@ public final class TransactionRepository implements PanacheRepositoryBase<Transa
      * or {@code false} if no transaction with the given ID was found.
      */
     @WithTransaction
-    public Uni<Boolean> deleteTransaction(UUID transaction) {
-        return deleteById(transaction);
+    public Uni<Either<Error, Success>> deleteTransaction(UUID transaction) {
+        return deleteById(transaction)
+                .<Either<Error, Success>>map(result -> Boolean.TRUE.equals(result) ? Either.right(new TransactionDeleteOk()) : Either.left(new TransactionNotFound(TransactionRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new TransactionServerError(throwable.getMessage(), TransactionRepository.class.getName())));
     }
 }
 

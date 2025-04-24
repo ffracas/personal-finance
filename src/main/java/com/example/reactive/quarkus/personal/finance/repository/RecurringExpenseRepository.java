@@ -1,6 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.repository;
 
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.RecurringExpense;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
+import com.example.reactive.quarkus.personal.finance.model.error.RecurringExpenseNotFound;
+import com.example.reactive.quarkus.personal.finance.model.error.RecurringExpenseServerError;
+import com.example.reactive.quarkus.personal.finance.model.success.RecurringExpenseDeleteOk;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -36,15 +42,11 @@ public final class RecurringExpenseRepository implements PanacheRepositoryBase<R
 
     private static final Logger Log = Logger.getLogger(RecurringExpenseRepository.class);
 
-    /**
-     * Retrieves a single {@link RecurringExpense} by its unique identifier.
-     *
-     * @param recurringExpenseId the UUID of the recurring expense to retrieve
-     * @return a {@link Uni} emitting the found {@link RecurringExpense}, or {@code null} if not found
-     */
-    @WithTransaction
-    public Uni<RecurringExpense> getRecurringExpenseById(UUID recurringExpenseId) {
-        return findById(recurringExpenseId);
+    private static Uni<Either<Error, RecurringExpense>> processResponse(Uni<RecurringExpense> recurringExpenseUni) {
+        return recurringExpenseUni
+                .<Either<Error, RecurringExpense>>map(recurringExpense -> recurringExpense != null ? Either.right(recurringExpense) : Either.left(new RecurringExpenseNotFound(RecurringExpenseRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new RecurringExpenseServerError(throwable.getMessage(), RecurringExpenseRepository.class.getName())));
     }
 
     /**
@@ -58,6 +60,17 @@ public final class RecurringExpenseRepository implements PanacheRepositoryBase<R
     }
 
     /**
+     * Retrieves a single {@link RecurringExpense} by its unique identifier.
+     *
+     * @param recurringExpenseId the UUID of the recurring expense to retrieve
+     * @return a {@link Uni} emitting the found {@link RecurringExpense}, or {@code null} if not found
+     */
+    @WithTransaction
+    public Uni<Either<Error, RecurringExpense>> getRecurringExpenseById(UUID recurringExpenseId) {
+        return processResponse(findById(recurringExpenseId));
+    }
+
+    /**
      * Persists a new {@link RecurringExpense} entity or updates an existing one in the database.
      * <p>
      * If an error occurs during persistence, the error is logged using {@link Logger#error(Object)}.
@@ -66,10 +79,8 @@ public final class RecurringExpenseRepository implements PanacheRepositoryBase<R
      * @return a {@link Uni} emitting the persisted {@link RecurringExpense}
      */
     @WithTransaction
-    public Uni<RecurringExpense> saveRecurringExpense(RecurringExpense recurringExpense) {
-        return persist(recurringExpense)
-                .onFailure()
-                .invoke(Log::error);
+    public Uni<Either<Error, RecurringExpense>> saveRecurringExpense(RecurringExpense recurringExpense) {
+        return processResponse(persist(recurringExpense));
     }
 
     /**
@@ -79,7 +90,8 @@ public final class RecurringExpenseRepository implements PanacheRepositoryBase<R
      * @return a {@link Uni} emitting {@code true} if the entity was deleted successfully, {@code false} otherwise
      */
     @WithTransaction
-    public Uni<Boolean> deleteRecurringExpense(UUID recurringExpenseId) {
-        return deleteById(recurringExpenseId);
+    public Uni<Either<Error, Success>> deleteRecurringExpense(UUID recurringExpenseId) {
+        return deleteById(recurringExpenseId)
+                .map(result -> Boolean.TRUE.equals(result) ? Either.right(new RecurringExpenseDeleteOk()) : Either.left(new RecurringExpenseNotFound(RecurringExpenseRepository.class.getName())));
     }
 }
