@@ -10,6 +10,9 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.Set;
 
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processEmptyResponse;
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processTheResultFromService;
+
 @Path("/bond")
 public final class BondController {
     private final BondService bondService;
@@ -22,10 +25,7 @@ public final class BondController {
     @GET
     @Path("/getBondById/{bondId}")
     public Uni<Response> getBondById(@PathParam("bondId") String bondId) {
-        return bondService.getBondById(bondId)
-                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(bondService.getBondById(bondId), Response.Status.OK);
     }
 
     @GET
@@ -37,28 +37,19 @@ public final class BondController {
     @POST
     @Path("/createBond")
     public Uni<Response> createBond(BondRequestDto bondRequestDto) {
-        return bondService.createBond(bondRequestDto)
-                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.CREATED).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.BAD_REQUEST).build());
+        return processTheResultFromService(bondService.createBond(bondRequestDto), Response.Status.CREATED);
     }
 
 
     @PUT
     @Path("/updateBond/{bondId}")
     public Uni<Response> updateBond(BondRequestDto bondRequestDto, @PathParam("bondId") String bondId) {
-        return bondService.updateBond(bondId, bondRequestDto)
-                .map(bondResponseDto -> Response.ok(bondResponseDto).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(bondService.updateBond(bondId, bondRequestDto), Response.Status.OK);
     }
 
     @DELETE
     @Path("/deleteBond/{bondId}")
     public Uni<Response> deleteBond(@PathParam("bondId") String bondId) {
-        return bondService.deleteBond(bondId)
-                .map(response -> response ? Response.status(Response.Status.NO_CONTENT).build() : Response.status(Response.Status.NOT_FOUND).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        return processEmptyResponse(bondService.deleteBond(bondId));
     }
 }

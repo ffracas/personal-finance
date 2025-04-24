@@ -1,6 +1,12 @@
 package com.example.reactive.quarkus.personal.finance.repository;
 
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Bond;
+import com.example.reactive.quarkus.personal.finance.model.error.BondNotFound;
+import com.example.reactive.quarkus.personal.finance.model.error.BondServerError;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
+import com.example.reactive.quarkus.personal.finance.model.success.BondDeleteOk;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
@@ -30,6 +36,12 @@ import java.util.UUID;
  */
 @ApplicationScoped
 public final class BondRepository implements PanacheRepositoryBase<Bond, UUID> {
+    private static Uni<Either<Error, Bond>> processResponse(Uni<Bond> bondUni) {
+        return bondUni
+                .<Either<Error, Bond>>map(bond -> bond != null ? Either.right(bond) : Either.left(new BondNotFound(BondRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new BondServerError(throwable.getMessage(), BondRepository.class.getName())));
+    }
 
     /**
      * Retrieves a bond entity from the database by its UUID.
@@ -38,8 +50,8 @@ public final class BondRepository implements PanacheRepositoryBase<Bond, UUID> {
      * @return a {@link Uni} emitting the {@link Bond} if found, or {@code null} if not
      */
     @WithTransaction
-    public Uni<Bond> getBondById(UUID bondId) {
-        return findById(bondId);
+    public Uni<Either<Error, Bond>> getBondById(UUID bondId) {
+        return processResponse(findById(bondId));
     }
 
     /**
@@ -59,8 +71,8 @@ public final class BondRepository implements PanacheRepositoryBase<Bond, UUID> {
      * @return a {@link Uni} emitting the persisted {@link Bond} instance
      */
     @WithTransaction
-    public Uni<Bond> createBond(Bond bond) {
-        return persist(bond);
+    public Uni<Either<Error, Bond>> createBond(Bond bond) {
+        return processResponse(persist(bond));
     }
 
     /**
@@ -70,7 +82,10 @@ public final class BondRepository implements PanacheRepositoryBase<Bond, UUID> {
      * @return a {@link Uni} emitting {@code true} if the entity was deleted, {@code false} otherwise
      */
     @WithTransaction
-    public Uni<Boolean> deleteBond(UUID bond) {
-        return deleteById(bond);
+    public Uni<Either<Error, Success>> deleteBond(UUID bond) {
+        return deleteById(bond)
+                .<Either<Error, Success>>map(result -> Boolean.TRUE.equals(result) ? Either.right(new BondDeleteOk()) : Either.left(new BondNotFound(BondRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new BondServerError(throwable.getMessage(), BondRepository.class.getName())));
     }
 }
