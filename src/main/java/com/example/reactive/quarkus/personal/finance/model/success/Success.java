@@ -1,4 +1,4 @@
 package com.example.reactive.quarkus.personal.finance.model.success;
 
-public sealed interface Success permits UserSuccess {
+public sealed interface Success permits TransactionSuccess, UserSuccess {
 }

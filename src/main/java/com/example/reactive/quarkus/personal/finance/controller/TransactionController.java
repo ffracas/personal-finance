@@ -15,6 +15,9 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.Set;
 
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processEmptyResponse;
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processTheResultFromService;
+
 @Path("/transaction")
 @Tag(name = "Transaction Operations", description = "Endpoints for managing transactions")
 public final class TransactionController {
@@ -30,10 +33,7 @@ public final class TransactionController {
     @GET
     @Path("/getTransactionById/{transactionId}")
     public Uni<Response> getTransactionById(@PathParam("transactionId") String transactionId) {
-        return transactionService.getTransactionById(transactionId)
-                .map(transactionResponseDto -> Response.ok(transactionResponseDto).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).entity(throwable).build());
+        return processTheResultFromService(transactionService.getTransactionById(transactionId), Response.Status.OK);
     }
 
 
@@ -50,10 +50,7 @@ public final class TransactionController {
     @POST
     @Path("/createTransaction")
     public Uni<Response> createTransaction(TransactionRequestDto transactionRequestDto) {
-        return transactionService.createTransaction(transactionRequestDto)
-                .map(transactionResponseDto -> Response.status(Response.Status.CREATED).entity(transactionResponseDto).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());
+        return processTheResultFromService(transactionService.createTransaction(transactionRequestDto), Response.Status.CREATED);
     }
 
     @Operation(summary = "Update an existing transaction", description = "Modifies details of an existing transaction.")
@@ -62,10 +59,7 @@ public final class TransactionController {
     @PUT
     @Path("/updateTransaction/{transactionId}")
     public Uni<Response> updateTransaction(TransactionRequestDto transactionRequestDto, @PathParam("transactionId") String transactionId) {
-        return transactionService.updateTransaction(transactionRequestDto, transactionId)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(transactionService.updateTransaction(transactionRequestDto, transactionId), Response.Status.OK);
     }
 
     @Operation(summary = "Delete a transaction", description = "Removes a transaction from the system using its ID.")
@@ -74,9 +68,6 @@ public final class TransactionController {
     @DELETE
     @Path("/deleteTransaction/{transactionId}")
     public Uni<Response> deleteTransaction(@PathParam("transactionId") String transactionId) {
-        return transactionService.deleteTransaction(transactionId)
-                .map(response -> response ? Response.status(Response.Status.NO_CONTENT).build() : Response.status(Response.Status.NOT_FOUND).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        return processEmptyResponse(transactionService.deleteTransaction(transactionId));
     }
 }

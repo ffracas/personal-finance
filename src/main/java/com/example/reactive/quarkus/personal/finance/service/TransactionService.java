@@ -1,10 +1,14 @@
 package com.example.reactive.quarkus.personal.finance.service;
 
 import com.example.reactive.quarkus.personal.finance.converter.TransactionConverter;
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Transaction;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
 import com.example.reactive.quarkus.personal.finance.model.request.TransactionRequestDto;
 import com.example.reactive.quarkus.personal.finance.model.response.TransactionResponseDto;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import com.example.reactive.quarkus.personal.finance.repository.TransactionRepository;
+import com.example.reactive.quarkus.personal.finance.utility.UtilMutiny;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -12,6 +16,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Set;
 import java.util.UUID;
+
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.startUniFromItem;
 
 /**
  * Service class responsible for managing transactions.
@@ -87,9 +93,11 @@ public final class TransactionService {
      * @return a {@link Uni} containing a {@link TransactionResponseDto} representing the transaction,
      * or empty if the transaction was not found.
      */
-    public Uni<TransactionResponseDto> getTransactionById(String transactionId) {
-        return transactionRepository.getTransactionById(UUID.fromString(transactionId))
-                .map(transactionConverter::toDto);
+    public Uni<Either<Error, TransactionResponseDto>> getTransactionById(String transactionId) {
+        return startUniFromItem(transactionId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> transactionRepository.getTransactionById(UUID.fromString(transactionId)))
+                .map(errorTransactionEither -> errorTransactionEither.map(transactionConverter::toDto));
     }
 
     /**
@@ -112,9 +120,9 @@ public final class TransactionService {
      * @param transactionRequestDto the DTO containing the data for the new transaction.
      * @return a {@link Uni} containing a {@link TransactionResponseDto} representing the created transaction.
      */
-    public Uni<TransactionResponseDto> createTransaction(TransactionRequestDto transactionRequestDto) {
+    public Uni<Either<Error, TransactionResponseDto>> createTransaction(TransactionRequestDto transactionRequestDto) {
         return transactionRepository.saveTransaction(transactionConverter.toEntity(transactionRequestDto))
-                .map(transactionConverter::toDto);
+                .map(errorTransactionEither -> errorTransactionEither.map(transactionConverter::toDto));
     }
 
     /**
@@ -127,11 +135,14 @@ public final class TransactionService {
      * @return a {@link Uni} containing a {@link TransactionResponseDto} representing the updated transaction.
      */
     @WithTransaction
-    public Uni<TransactionResponseDto> updateTransaction(TransactionRequestDto transactionRequestDto, String transactionId) {
-        return transactionRepository.getTransactionById(UUID.fromString(transactionId))
-                .map(transaction -> updateTransaction(transaction, transactionRequestDto))
-                .flatMap(transaction -> transactionRepository.saveTransaction(transaction)
-                        .map(transactionConverter::toDto));
+    public Uni<Either<Error, TransactionResponseDto>> updateTransaction(TransactionRequestDto transactionRequestDto, String transactionId) {
+        return startUniFromItem(transactionId)
+                .map(UUID::fromString)
+                .flatMap(uuid -> transactionRepository.getTransactionById(UUID.fromString(transactionId)))
+                .map(errorTransactionEither -> errorTransactionEither.map(transaction -> updateTransaction(transaction, transactionRequestDto)))
+                .flatMap(eitherUpdated -> eitherUpdated.fold(error -> UtilMutiny.createUniError(eitherUpdated),
+                        transaction -> transactionRepository.saveTransaction(transaction)
+                                .map(either -> either.map(transactionConverter::toDto))));
     }
 
     /**
@@ -141,7 +152,7 @@ public final class TransactionService {
      * @param transactionId the unique ID of the transaction to delete.
      * @return a {@link Uni} containing a {@code Boolean} indicating whether the deletion was successful.
      */
-    public Uni<Boolean> deleteTransaction(String transactionId) {
+    public Uni<Either<Error, Success>> deleteTransaction(String transactionId) {
         return transactionRepository.deleteTransaction(UUID.fromString(transactionId));
     }
 }
