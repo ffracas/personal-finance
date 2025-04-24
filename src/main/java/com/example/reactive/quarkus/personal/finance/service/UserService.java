@@ -8,6 +8,7 @@ import com.example.reactive.quarkus.personal.finance.model.request.UserRequestDt
 import com.example.reactive.quarkus.personal.finance.model.response.UserResponseDto;
 import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import com.example.reactive.quarkus.personal.finance.repository.UserRepository;
+import com.example.reactive.quarkus.personal.finance.utility.UtilMutiny;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -16,6 +17,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.example.reactive.quarkus.personal.finance.utility.UtilMutiny.startUniFromItem;
 
 /**
  * Service class responsible for handling user-related operations.
@@ -121,14 +124,23 @@ public final class UserService {
      * @return a {@link Uni} emitting the updated user as a {@link UserResponseDto}
      */
     @WithTransaction
-    public Uni<UserResponseDto> updateUser(UserRequestDto userRequestDto, String userId) {
-        return userRepository.findById(UUID.fromString(userId))
-                .map(user -> updateUser(user, userRequestDto))
-                .flatMap(user -> userRepository.persist(user)
-                        .map(userConverter::toDto));
+    public Uni<Either<Error, UserResponseDto>> updateUser(UserRequestDto userRequestDto, String userId) {
+        return startUniFromItem(userId)
+                .map(UUID::fromString)
+                .map(userRepository::getUserById)
+                .flatMap(uni -> uni
+                        .flatMap(errorUserEither -> errorUserEither
+                                .fold(error -> UtilMutiny.createUniError(errorUserEither),
+                                        user -> userRepository.saveUser(updateUser(user, userRequestDto))
+                                                .map(either -> either.map(userConverter::toDto))
+                                )
+                        )
+                );
     }
 
     public Uni<Either<Error, Success>> deleteUser(String userId) {
-        return userRepository.deleteUser(UUID.fromString(userId));
+        return startUniFromItem(userId)
+                .map(UUID::fromString)
+                .flatMap(userRepository::deleteUser);
     }
 }

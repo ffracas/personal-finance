@@ -13,11 +13,13 @@ import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
 import java.util.Set;
+
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processEmptyResponse;
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processTheResultFromService;
 
 /**
  * <p>
@@ -80,19 +82,14 @@ public final class UserController {
      * @see UserService#getUserById(String)
      */
     @Operation(summary = "Retrieve user details by ID")
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "User found", content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = UserResponseDto.class))),
-            @APIResponse(responseCode = "404", description = "User not found"),
-            @APIResponse(responseCode = "500", description = "Internal server error")
-    })
+    @APIResponse(responseCode = "200", description = "User found", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)))
+    @APIResponse(responseCode = "404", description = "User not found")
+    @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @Path("/getUser/{userId}")
     public Uni<Response> getUserById(@PathParam("userId") String userId) {
-        return userService.getUserById(userId)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(userService.getUserById(userId), Response.Status.OK);
     }
 
     /**
@@ -109,11 +106,9 @@ public final class UserController {
      * @see UserService#getAllUser()
      */
     @Operation(summary = "Retrieve all users")
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "Successfully retrieved list", content = @Content(mediaType = "application/json",
-                    schema = @Schema(type = SchemaType.ARRAY, implementation = UserResponseDto.class))),
-            @APIResponse(responseCode = "500", description = "Internal server error")
-    })
+    @APIResponse(responseCode = "200", description = "Successfully retrieved list", content = @Content(mediaType = "application/json",
+            schema = @Schema(type = SchemaType.ARRAY, implementation = UserResponseDto.class)))
+    @APIResponse(responseCode = "500", description = "Internal server error")
     @GET
     @Path("/getAllUser")
     public Multi<Set<UserResponseDto>> getAllUser() {
@@ -137,19 +132,14 @@ public final class UserController {
      */
     @ResponseStatus(201)
     @Operation(summary = "Create a new user")
-    @APIResponses({
-            @APIResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = UserResponseDto.class))),
-            @APIResponse(responseCode = "400", description = "Invalid input"),
-            @APIResponse(responseCode = "500", description = "Internal server error")
-    })
+    @APIResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)))
+    @APIResponse(responseCode = "400", description = "Invalid input")
+    @APIResponse(responseCode = "500", description = "Internal server error")
     @POST
     @Path("/createUser")
     public Uni<Response> createUser(UserRequestDto userRequestDto) {
-        return userService.createUser(userRequestDto)
-                .map(user -> Response.ok(user).status(Response.Status.CREATED).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.BAD_REQUEST).build());
+        return processTheResultFromService(userService.createUser(userRequestDto), Response.Status.CREATED);
     }
 
     /**
@@ -169,28 +159,20 @@ public final class UserController {
      * @see UserService#updateUser(UserRequestDto, String)
      */
     @Operation(summary = "Update an existing user")
-    @APIResponses({
-            @APIResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = UserResponseDto.class))),
-            @APIResponse(responseCode = "400", description = "Invalid input"),
-            @APIResponse(responseCode = "404", description = "User not found"),
-            @APIResponse(responseCode = "500", description = "Internal server error")
-    })
+    @APIResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = UserResponseDto.class)))
+    @APIResponse(responseCode = "400", description = "Invalid input")
+    @APIResponse(responseCode = "404", description = "User not found")
+    @APIResponse(responseCode = "500", description = "Internal server error")
     @PUT
     @Path("/updateUser/{userId}")
     public Uni<Response> updateUser(UserRequestDto userRequestDto, @PathParam("userId") String userId) {
-        return userService.updateUser(userRequestDto, userId)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(userService.updateUser(userRequestDto, userId), Response.Status.OK);
     }
 
     @DELETE
     @Path("/deleteUser/{userId}")
     public Uni<Response> deleteUser(@PathParam("userId") String userId) {
-        return userService.deleteUser(userId)
-                .map(response -> response ? Response.status(Response.Status.NO_CONTENT).build() : Response.status(Response.Status.NOT_FOUND).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        return processEmptyResponse(userService.deleteUser(userId));
     }
 }
