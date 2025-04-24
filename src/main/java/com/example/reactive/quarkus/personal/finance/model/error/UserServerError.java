@@ -1,4 +1,9 @@
 package com.example.reactive.quarkus.personal.finance.model.error;
 
-public record UserServerError() implements UserError {
+import java.time.LocalDate;
+
+public record UserServerError(String message, String name, LocalDate time) implements UserError {
+    public UserServerError(String message, String name) {
+        this(message, name, LocalDate.now());
+    }
 }
