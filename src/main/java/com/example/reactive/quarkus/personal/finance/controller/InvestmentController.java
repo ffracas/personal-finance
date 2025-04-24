@@ -14,6 +14,9 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.Set;
 
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processEmptyResponse;
+import static com.example.reactive.quarkus.personal.finance.utility.ProcessResponse.processTheResultFromService;
+
 /**
  * REST controller for managing investments.
  * <p>
@@ -64,10 +67,7 @@ public final class InvestmentController {
             @APIResponse(responseCode = "404", description = "Investment not found")
     })
     public Uni<Response> getInvestmentById(@PathParam("investmentId") String investmentId) {
-        return investmentService.getInvestmentById(investmentId)
-                .map(investmentResponseDto -> Response.ok().entity(investmentResponseDto).build())
-                .onFailure()
-                .recoverWithItem(Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(investmentService.getInvestmentById(investmentId), Response.Status.OK);
     }
 
     /**
@@ -85,10 +85,7 @@ public final class InvestmentController {
             @APIResponse(responseCode = "500", description = "Internal server error during investment creation")
     })
     public Uni<Response> createInvestment(InvestmentRequestDto investmentRequestDto) {
-        return investmentService.createInvestment(investmentRequestDto)
-                .map(investmentResponseDto -> Response.status(Response.Status.CREATED).entity(investmentResponseDto).build())
-                .onFailure()
-                .recoverWithItem(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        return processTheResultFromService(investmentService.createInvestment(investmentRequestDto), Response.Status.CREATED);
     }
 
     /**
@@ -107,10 +104,7 @@ public final class InvestmentController {
             @APIResponse(responseCode = "404", description = "Investment not found")
     })
     public Uni<Response> updateInvestment(@PathParam("investmentId") String investmentId, InvestmentRequestDto investmentRequestDto) {
-        return investmentService.updateInvestment(investmentRequestDto, investmentId)
-                .map(user -> Response.ok(user).status(Response.Status.OK).build())
-                .onFailure()
-                .recoverWithItem(throwable -> Response.status(Response.Status.NOT_FOUND).build());
+        return processTheResultFromService(investmentService.updateInvestment(investmentRequestDto, investmentId), Response.Status.OK);
     }
 
     /**
@@ -129,11 +123,6 @@ public final class InvestmentController {
             @APIResponse(responseCode = "500", description = "Internal server error during deletion")
     })
     public Uni<Response> deleteInvestment(@PathParam("investmentId") String investmentId) {
-        return investmentService.deleteInvestmentById(investmentId)
-                .map(result -> result
-                        ? Response.status(Response.Status.NO_CONTENT).build()
-                        : Response.status(Response.Status.NOT_FOUND).build())
-                .onFailure()
-                .recoverWithItem(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        return processEmptyResponse(investmentService.deleteInvestmentById(investmentId));
     }
 }

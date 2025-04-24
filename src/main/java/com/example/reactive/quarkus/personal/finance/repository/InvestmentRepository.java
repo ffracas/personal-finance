@@ -1,9 +1,14 @@
 package com.example.reactive.quarkus.personal.finance.repository;
 
+import com.example.reactive.quarkus.personal.finance.functional.Either;
 import com.example.reactive.quarkus.personal.finance.model.entity.Investment;
+import com.example.reactive.quarkus.personal.finance.model.error.Error;
+import com.example.reactive.quarkus.personal.finance.model.error.InvestmentNotFound;
+import com.example.reactive.quarkus.personal.finance.model.error.InvestmentServerError;
+import com.example.reactive.quarkus.personal.finance.model.success.InvestmentDeleteOk;
+import com.example.reactive.quarkus.personal.finance.model.success.Success;
 import io.quarkus.hibernate.reactive.panache.PanacheRepositoryBase;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
-import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,6 +31,12 @@ import java.util.UUID;
  */
 @ApplicationScoped
 public final class InvestmentRepository implements PanacheRepositoryBase<Investment, UUID> {
+    private static Uni<Either<Error, Investment>> processResponse(Uni<Investment> investmentUni) {
+        return investmentUni
+                .<Either<Error, Investment>>map(investment -> investment != null ? Either.right(investment) : Either.left(new InvestmentNotFound(InvestmentRepository.class.getName())))
+                .onFailure()
+                .recoverWithItem(throwable -> Either.left(new InvestmentServerError(throwable.getMessage(), InvestmentRepository.class.getName())));
+    }
 
     /**
      * Persists the provided {@link Investment} entity in the database.
@@ -39,10 +50,8 @@ public final class InvestmentRepository implements PanacheRepositoryBase<Investm
      * or propagating an error if the operation fails
      */
     @WithTransaction
-    public Uni<Investment> saveInvestment(Investment investment) {
-        return persist(investment)
-                .onFailure()
-                .invoke(Log::error);
+    public Uni<Either<Error, Investment>> saveInvestment(Investment investment) {
+        return processResponse(persist(investment));
     }
 
     @WithTransaction
@@ -60,8 +69,9 @@ public final class InvestmentRepository implements PanacheRepositoryBase<Investm
      * @return a {@link Uni} emitting a {@code Boolean} indicating whether the deletion was successful
      */
     @WithTransaction
-    public Uni<Boolean> deleteInvestment(UUID investmentId) {
-        return deleteById(investmentId);
+    public Uni<Either<Error, Success>> deleteInvestment(UUID investmentId) {
+        return deleteById(investmentId)
+                .map(result -> Boolean.TRUE.equals(result) ? Either.right(new InvestmentDeleteOk()) : Either.left(new InvestmentNotFound(InvestmentRepository.class.getName())));
     }
 
     /**
@@ -76,7 +86,7 @@ public final class InvestmentRepository implements PanacheRepositoryBase<Investm
      * or an empty result if not found
      */
     @WithTransaction
-    public Uni<Investment> getInvestmentById(UUID investmentId) {
-        return findById(investmentId);
+    public Uni<Either<Error, Investment>> getInvestmentById(UUID investmentId) {
+        return processResponse(findById(investmentId));
     }
 }
